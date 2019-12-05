@@ -6,3 +6,4 @@ master上修改readme
 =======
 feature1上修改readme
 >>>>>>> feature1
+dev修改readme
