@@ -11,6 +11,11 @@ from PIL import Image
 # itchat.auto_login(hotReload=True)
 
 
+# TEXT:文本-------文本内容
+# MAP:地图--------位置文本
+# CARD:名片-------推荐人字典
+# NOTE:通知-------通知文本
+# SHARING:分享----分享名称
 @itchat.msg_register([TEXT,MAP,CARD,NOTE,SHARING])
 def print_text(msg):
     print(msg['Text'])
@@ -20,22 +25,48 @@ def print_text(msg):
     return res
 
 
+# PICTURE:图片/表情------下载方法
+# RECORDING:语音---------下载方法
+# ATTACHMENT:附件--------下载方法
+# VIDEO:小视频-----------下载方法
 @itchat.msg_register([PICTURE,RECORDING,ATTACHMENT,VIDEO])
-def show_picture(picture):
+def show_picture(msg):
     # print(type(picture))
-    print(picture)
-    # img_base64 = picture['Content']
-    # print(img_base64)
-    # return picture
-    # image = base64_to_PIL(img_base64)
-    # image.show()
-    # picture.download(picture.fileName)
-    # itchat.send('@%s%s' % ('img' if picture['Type']=='Picture' else 'fil',picture['FileName']),
-    #     picture['FromUserName']
-    # )
-    # return '%s received' % picture['Type']
+    print(msg)
+    # msg.download(msg.fileName)
+    # typeSymbol = {
+    #     'Picture':'img',
+    #     'Attachment':'fil',
+    #     'Video':'vid',
+    #     'Recording':'fil'
+    # }
+    # 根据消息类型，返回发送的消息
+    # itchat.send('@%s@%s' % (typeSymbol[msg['Type']],msg['FileName']),msg['FromUserName'])
+    # 消息类型是图片返回图片，消息类型不是图片全部当作文件
+    itchat.send('@%s@%s' % ('img' if msg['Type']=='Picture' else 'fil' ,msg['FileName']),
+        msg['FromUserName']
+    )
+    return '%s received' % msg['Type']
+
+# FRIENDS:好友邀请-----添加好友所需参数
+@itchat.msg_register(FRIENDS)
+def add_friend(msg):
+    msg.user.verify()
+    msg.user.send('Nice to meet you!')
 
 
+# isGroupChat:是否是群消息
+# isAt:是否@本账号
+@itchat.msg_register(TEXT,isGroupChat=True)
+def reply_group(msg):
+    print(msg)
+    print(msg.isAt)
+    print(msg.actualNickName)
+    print(msg.text)
+    itchat.send(msg.text,msg['FromUserName'])
+
+
+# base64编码转换为PIL图片
 def base64_to_PIL(String):
     try:
         base64_data = base64.b64decode(String)
@@ -49,6 +80,7 @@ def base64_to_PIL(String):
         # return None
 
 
+# 图灵机器人
 def get_response(msg):
     KEY = '8edce3ce905a4c1dbb965e6b35c3834d'
     apiUrl = 'http://openapi.tuling123.com/openapi/api/v2'
@@ -84,6 +116,7 @@ def get_response(msg):
 # image.show()
 
 
+# 获取好友信息
 def get_friend(name):
     # 获取自己的用户信息
     # myself = itchat.search_friends()
@@ -104,8 +137,8 @@ if __name__ == "__main__":
     # itchat.auto_login(hotReload=True,enableCmdQR=True)
     # 扫描二维码登录，hotReload=True表示不需要重新扫描
     itchat.auto_login(hotReload=True)
-    newInstance = itchat.new_instance()
-    newInstance.auto_login(hotReload=True,statusStorageDir='newInstance.pkl')
+    # newInstance = itchat.new_instance()
+    # newInstance.auto_login(hotReload=True,statusStorageDir='newInstance.pkl')
     # sleep(5)
     # get_friend('')
 # itchat.send('hello',toUserName="filehelper")
