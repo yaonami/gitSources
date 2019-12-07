@@ -16,7 +16,7 @@ from PIL import Image
 # CARD:名片-------推荐人字典
 # NOTE:通知-------通知文本
 # SHARING:分享----分享名称
-@itchat.msg_register([TEXT,MAP,CARD,NOTE,SHARING])
+@itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
 def print_text(msg):
     print(msg['Text'])
     # return itchat.send(get_response(msg['Text']),'filehelper')
@@ -30,7 +30,7 @@ def print_text(msg):
 # RECORDING:语音---------下载方法
 # ATTACHMENT:附件--------下载方法
 # VIDEO:小视频-----------下载方法
-@itchat.msg_register([PICTURE,RECORDING,ATTACHMENT,VIDEO])
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
 def show_picture(msg):
     # print(type(picture))
     print(msg)
@@ -44,10 +44,11 @@ def show_picture(msg):
     # 根据消息类型，返回发送的消息
     # itchat.send('@%s@%s' % (typeSymbol[msg['Type']],msg['FileName']),msg['FromUserName'])
     # 消息类型是图片返回图片，消息类型不是图片全部当作文件
-    itchat.send('@%s@%s' % ('img' if msg['Type']=='Picture' else 'fil' ,msg['FileName']),
-        msg['FromUserName']
-    )
+    itchat.send('@%s@%s' % ('img' if msg['Type'] == 'Picture' else 'fil', msg['FileName']),
+                msg['FromUserName']
+                )
     return '%s received' % msg['Type']
+
 
 # FRIENDS:好友邀请-----添加好友所需参数
 @itchat.msg_register(FRIENDS)
@@ -58,14 +59,14 @@ def add_friend(msg):
 
 # isGroupChat:是否是群消息
 # isAt:是否@本账号
-@itchat.msg_register(TEXT,isGroupChat=True)
+@itchat.msg_register(TEXT, isGroupChat=True)
 def reply_group(msg):
     print(msg)
     print(msg.isAt)
     print(msg.actualNickName)
     print(msg.text)
     if msg.text:
-        itchat.send(msg.text,msg['FromUserName'])
+        itchat.send(msg.text, msg['FromUserName'])
 
 
 # base64编码转换为PIL图片
@@ -78,7 +79,7 @@ def base64_to_PIL(String):
         img = Image.open(buf).convert('RGB')
         return img
     except:
-       raise
+        raise
         # return None
 
 
@@ -154,6 +155,6 @@ if __name__ == "__main__":
     # newInstance.auto_login(hotReload=True,statusStorageDir='newInstance.pkl')
     # sleep(5)
     # get_friend('')
-# itchat.send('hello',toUserName="filehelper")
+    # itchat.send('hello',toUserName="filehelper")
     itchat.run()
-#     # print(get_response('今天什么日子呀'))
+    # print(get_response('今天什么日子呀'))
