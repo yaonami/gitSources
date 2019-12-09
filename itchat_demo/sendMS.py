@@ -1,4 +1,5 @@
 import itchat
+import requests
 
 
 def sendMsg():
@@ -8,3 +9,19 @@ def sendMsg():
 def sendMsgByNickName(nickName,msg):
     info = itchat.search_friends(nickName)
     itchat.send(msg, info['UserName'])
+
+
+def getWeather(city):
+    url = 'https://free-api.heweather.com/v5/forecast?city='+city+'&key=7d0daf2a85f64736a42261161cd3060b'
+    html = requests.get(url)
+    html.encoding = 'utf8'
+    data = html.json()
+    print(data)
+    # data = data.json()
+    print(type(data))
+    weather = data['HeWeather5'][0]['daily_forecast']
+    print(weather)
+    daily_weather = weather[0]
+    print(daily_weather)
+
+
