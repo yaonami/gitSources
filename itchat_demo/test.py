@@ -138,9 +138,9 @@ def get_friend(name):
     # 获取特定的用户信息，userName=UserName(好友信息中UserName的值)
     # friend = itchat.search_friends(userName=name)
     # 获取任何一项等于name的用户（备注，微信号，昵称任何一项等于）
-    # friend = itchat.search_friends(name=name)
+    friends = itchat.search_friends(name=name)
     # 获取备注，微信号，昵称分别等于相应键值的用户
-    friends = itchat.search_friends(wechatAccount=name)
+    # friends = itchat.search_friends(wechatAccount=name)
     # itchat.search_friends(name=name,wechatAccount=name)
     for friend in friends:
         print(friend)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     # newInstance = itchat.new_instance()
     # newInstance.auto_login(hotReload=True,statusStorageDir='newInstance.pkl')
     # sleep(5)
-    # get_friend('')
+    get_friend('一人一歌一世界')
     # itchat.send('hello',toUserName="filehelper")
     itchat.run()
     # print(get_response('今天什么日子呀'))
