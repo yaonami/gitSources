@@ -1,27 +1,14 @@
 import itchat
-import requests
 
 
-def sendMsg():
-    itchat.send('hello,nice to meet you!', '@cd6ec55721dbed471f992ad8de4b5877c06bb7243814b62fff0bb26a656a5d10')
+# 发送消息给自己
+def sendMsg(msg):
+    itchat.send(msg, '@b5bc0ef02627f80b23f63efdf6b0fd22764f9533945900cd51726a2767a234d1')
 
 
+# 通过昵称发送消息
 def sendMsgByNickName(nickName,msg):
-    info = itchat.search_friends(nickName)
+    info = itchat.search_friends(nickName)[0]
     itchat.send(msg, info['UserName'])
-
-
-def getWeather(city):
-    url = 'https://free-api.heweather.com/v5/forecast?city='+city+'&key=7d0daf2a85f64736a42261161cd3060b'
-    html = requests.get(url)
-    html.encoding = 'utf8'
-    data = html.json()
-    print(data)
-    # data = data.json()
-    print(type(data))
-    weather = data['HeWeather5'][0]['daily_forecast']
-    print(weather)
-    daily_weather = weather[0]
-    print(daily_weather)
 
 
