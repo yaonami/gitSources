@@ -2,6 +2,7 @@ import requests
 import time
 
 
+# 获取每日句子
 def getSentence():
     url = 'http://open.iciba.com/dsapi'
     html = requests.get(url).json()

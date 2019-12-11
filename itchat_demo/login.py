@@ -8,6 +8,7 @@ import sendMS
 import weather
 import robot
 import friend
+import translation
 
 
 def login():
@@ -19,20 +20,63 @@ def print_time():
 
 
 @itchat.msg_register(TEXT)
-def sendMsgByQYKRobot(msg):
-    print(msg)
+def sendTranslation(msg):
     global user_status
+    print(msg)
     if user_status[msg['FromUserName']]:
-        if msg['Text']=='小叮咚再见':
-            itchat.send('再见!', msg['FromUserName'])
+        if msg['Text'] == '小小翻译官再见':
+            itchat.send('再见~', msg['FromUserName'])
             user_status[msg['FromUserName']] = False
         else:
-            info = robot.QINGYUNKERobot(msg['Text'])
-            itchat.send(info, msg['FromUserName'])
+            language = translation.detect_language(msg['Text'])
+            itchat.send('您当前输入的语言为：'+language, msg['FromUserName'])
+            results = translation.translationText(msg['Text'],language)
+            if len(results)==0:
+                itchat.send('很抱歉无法为您匹配对应的翻译，我会持续改进的，感谢您的使用', msg['FromUserName'])
+            else:
+                for result in results:
+                    itchat.send(result['language']+'翻译为：\n'+result['content']+'\n下面是'+result['language']+'读音', msg['FromUserName'])
+                    itchat.send_file(result['voice'], msg['FromUserName'])
     else:
-        if msg['Text'] == '小叮咚':
-            itchat.send('在的呢!', msg['FromUserName'])
+        if msg['Text'] == '小小翻译官':
+            itchat.send('在的呢，您可以输入您想翻译的内容哦~', msg['FromUserName'])
             user_status[msg['FromUserName']] = True
+
+
+
+# @itchat.msg_register(TEXT)
+# def sendDetectLanguage(msg):
+#     global user_status
+#     print(msg)
+#     if user_status[msg['FromUserName']]:
+#         if msg['Text'] == '结束检测':
+#             itchat.send('语言检测助手下线啦', msg['FromUserName'])
+#             user_status[msg['FromUserName']] = False
+#         else:
+#             info = translation.detect_language(msg['Text'])
+#             itchat.send(info, msg['FromUserName'])
+#     else:
+#         if msg['Text'] == '语言检测助手':
+#             itchat.send('语言检测助手到', msg['FromUserName'])
+#             user_status[msg['FromUserName']] = True
+
+
+# @itchat.msg_register(TEXT)
+# def sendMsgByQYKRobot(msg):
+#     print(msg)
+#     global user_status
+#     if user_status[msg['FromUserName']]:
+#         if msg['Text']=='小叮咚再见':
+#             itchat.send('再见!', msg['FromUserName'])
+#             user_status[msg['FromUserName']] = False
+#         else:
+#             info = robot.QINGYUNKERobot(msg['Text'])
+#             time.sleep(2)
+#             itchat.send(info, msg['FromUserName'])
+#     else:
+#         if msg['Text'] == '小叮咚':
+#             itchat.send('在的呢!', msg['FromUserName'])
+#             user_status[msg['FromUserName']] = True
 
 
 # @itchat.msg_register(TEXT)
@@ -99,8 +143,13 @@ if __name__ == "__main__":
     global user_status
     login()
     user_status = friend.createUserStatusDict()
+    # print(user_status)
+    # user_status = friend.createUserStatusRWDict()
+    # print(user_status)
     sentence_remarkNames = ['A大树','D肖健伟','XC罗','X度小囡','X李涛','X十一','X云熙','XL先生']
     # sentence_remarkNames = ['A大树']
+    # sendMS.sendTranslationTips(sentence_remarkNames)
+    # sendMS.sendDetectLanguageTips(sentence_remarkNames)
     sendMS.sendMsgTips(sentence_remarkNames)
     # sendMS.sendEvening(sentence_remarkNames)
     # sendMS.sendMorning(sentence_remarkNames)
@@ -118,8 +167,10 @@ if __name__ == "__main__":
     # # scheduler.add_job(print_time, 'date', run_date='2019-12-7 14:35:00')
     # scheduler.add_job(sendMsgByQYKRobot, trigger='cron', hour='20', minute='18')
     # scheduler.add_job(sendWeather, trigger='cron', hour='20', minute='20')
-    scheduler.add_job(login, 'cron', hour='22', minute='00')
-    scheduler.add_job(sendMS.sendTips, args=[sentence_remarkNames,], trigger='cron', hour='22', minute='01')
+    scheduler.add_job(login, 'cron', hour='21', minute='00')
+    scheduler.add_job(sendMS.sendTranslationTips, args=[sentence_remarkNames,], trigger='cron', hour='21', minute='01')
+    # scheduler.add_job(sendMS.sendTranslationTips, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='33')
+    # scheduler.add_job(sendMS.sendTips, args=[sentence_remarkNames,], trigger='cron', hour='22', minute='01')
     # scheduler.add_job(sendMS.sendTips, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='36')
     scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames,], trigger='cron', hour='22', minute='30')
     # scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='37')
