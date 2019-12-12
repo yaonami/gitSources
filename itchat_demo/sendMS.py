@@ -1,5 +1,6 @@
 import itchat
 import time
+import os
 
 import message
 import weather
@@ -35,7 +36,9 @@ def sendSentence(remarkNames):
     msg = '今天分享的句子：' + '\n' + content + '\n' + note +'\n'+'下面是音频文件'
     for remarkName in remarkNames:
         info = itchat.search_friends(remarkName)[0]
+        time.sleep(2)
         itchat.send_msg(msg, info['UserName'])
+        time.sleep(2)
         itchat.send_file(voicePath, info['UserName'])
 
 
@@ -44,19 +47,24 @@ def sendTips(remarkNames):
     msg = '小叮咚上线啦' + '\n' + '每天22:00-8:00' + '\n' + '开启聊天请回复"小叮咚"' + '\n' + '结束聊天请回复"小叮咚再见"'
     for remarkName in remarkNames:
         info = itchat.search_friends(remarkName)[0]
+        time.sleep(2)
         itchat.send_msg(msg, info['UserName'])
 
 
 # 发送早上好
 def sendMorning(remarkNames):
-    msg = ' 美好的一天开始了，每天给自己一个希望，试着不为明天而烦恼，不为昨天而叹息，只为今天更美好。早安～～～'
+    msg = ' 任何收获都不是巧合，而是用日复一日的付出换来。不怕你每天迈的步子太小，只怕你停滞不前；不怕你每天做的事太少，' \
+          '只怕你无所事事。今日一点一滴的进步，终会塑造一个与众不同的你。新的一天，早安！'
     today = time.strftime("%Y%m%d")
-    picture = 'picture/' + today + '-morning.gif'
+    picture = './picture/' + today + '-morning.gif'
     # print(picture)
     for remarkName in remarkNames:
         info = itchat.search_friends(remarkName)[0]
+        time.sleep(2)
         itchat.send_msg(msg, info['UserName'])
-        itchat.send_image(picture, info['UserName'])
+        if os.path.exists(picture):
+            time.sleep(2)
+            itchat.send_image(picture, info['UserName'])
 
 
 # 发送天气使用提示
@@ -82,14 +90,17 @@ def sendEvening(remarkNames):
                 '大千世界，我们并不是缺少一个说话的朋友，而是渴望一个理解自己读懂自己的伙伴。晚安。',
                 '总有人会穿越人海找到你，拥抱你，无论海水涨潮还是退潮，无论日出还是日落，他都会坚定地奔向你，不退缩，'
                 '不犹豫。晚安。']
-    msg = '人生中，我们有太多的烦恼与浮躁，伴随着这个冬季的寒冷而来。只有晚上，家是温暖的，心是清闲的，因而我们应懂得享受。' \
-          '晚安。'
+    msg = '大千世界，我们并不是缺少一个说话的朋友，而是渴望一个理解自己读懂自己的伙伴。晚安~~'
     today = time.strftime("%Y%m%d")
-    picture = 'picture/' + today + '-evening.gif'
+    picture = 'picture/' + str(today) + '-evening.gif'
     for remarkName in remarkNames:
         info = itchat.search_friends(remarkName)[0]
         itchat.send_msg(msg, info['UserName'])
-        itchat.send_image(picture, info['UserName'])
+        # print(picture)
+        # print(os.path.exists(picture))
+        # itchat.send('@%img@%s' % picture, info['UserName'])
+        if os.path.exists(picture):
+            itchat.send_image(picture, info['UserName'])
 
 
 # 发送语言检测助手使用说明
@@ -110,7 +121,45 @@ def sendTranslationTips(remarkNames):
 
 # 程序启动提示
 def sendMsgTips(remarkNames):
-    msg = '小叮咚今日已下线，过段时间会再次上线，今天稍后会上线新功能，欢迎体验！'
+    msg = '小叮咚今日重新上线啦，请您踊跃体验小叮咚功能,谢谢您!'
     for remarkName in remarkNames:
         info = itchat.search_friends(remarkName)[0]
         itchat.send_msg(msg, info['UserName'])
+
+
+# 发送小叮咚使用说明
+def sendRobotUseGuide(remarkNames):
+    msg = '小叮咚使用指南\n启动小叮咚请回复(小叮咚)\n关闭小叮咚请回复(小叮咚再见)\n小叮咚下设自动聊天,翻译和天气查询功能\n' \
+          '开启翻译请回复(翻译)\n开启天气查询请回复(天气)\n自动聊天请回复你想说的话'
+    for remarkName in remarkNames:
+        info = itchat.search_friends(remarkName)[0]
+        itchat.send_msg(msg, info['UserName'])
+
+
+# 给特定某一人发送小叮咚使用指南
+def sendRobotUseGuideToOne(username):
+    msg = '小叮咚使用指南\n启动小叮咚请回复(小叮咚)\n关闭小叮咚请回复(小叮咚再见)\n小叮咚下设自动聊天,翻译和天气查询功能\n' \
+          '开启翻译请回复(翻译)\n开启天气查询请回复(天气)\n自动聊天请回复你想说的话'
+    itchat.send(msg, username)
+
+
+# 给特定的某一人发送开启小叮咚使用指南
+def sendStartRobotUseGuideToOne(username):
+    msg = '小叮咚使用指南\n启动小叮咚请回复(小叮咚)\n关闭小叮咚请回复(小叮咚再见)'
+    itchat.send(msg, username)
+
+
+# 给特定的某一人发送翻译助手使用指南
+def sendTranslationUseGuide(username):
+    msg = '小小翻译官使用指南\n开启翻译请回复(翻译)\n结束翻译请回复(小小翻译官再见)\n小小翻译官目前支持中英互译和中日互译\n' \
+          '选择中英互译请回复(中英互译)\n选择中日互译请回复(中日互译)'
+    itchat.send(msg, username)
+
+
+# 给特定的某人发送天气使用指南
+def sendWeatherUseGuide(username):
+    msg = '天气小助手使用指南\n开启天气小助手请回复(天气)\n结束天气小助手请回复(天气小助手再见)\n天气小助手目前支持' \
+          '查询实时天气，未来24小时天气，未来7天天气\n查询实时天气请回复(实时天气)\n退出实时天气查询请回复(关闭实时天气)' \
+          '\n查询未来7天天气请回复(7天天气)\n退出未来7天天气查询请回复(关闭7天天气)\n' \
+          '查询未来24小时天气请回复(24小时天气)\n退出未来24小时天气查询请回复(关闭24小时天气)'
+    itchat.send(msg, username)

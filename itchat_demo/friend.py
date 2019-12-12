@@ -37,3 +37,49 @@ def get_friend(name):
     print(friends)
     for friend in friends:
         print(friend)
+
+
+# 创建功能状态字典
+def createFunctionStatusDict():
+    UserNameList = getAllFriends()
+    status = []
+    translation_dict = {
+        'status':False,
+        '中英互译':False,
+        '中日互译':False,
+    }
+    weather_dict = {
+        'status': False,
+        '实时天气':False,
+        '小时天气':False,
+        '多天天气':False
+    }
+    function_dict = {
+        'translation':translation_dict,
+        'weather':weather_dict
+    }
+    for i in range(len(UserNameList)):
+        status.append(function_dict)
+    function_status = dict(zip(UserNameList,status))
+    return function_status
+
+
+# 单独某一个人的功能状态全部设置为False
+def setFunctionStatusFalse():
+    # function_status = createFunctionStatusDict()
+    translation_dict = {
+        'status': False,
+        '中英互译': False,
+        '中日互译': False,
+    }
+    weather_dict = {
+        'status': False,
+        '实时天气': False,
+        '小时天气': False,
+        '多天天气': False
+    }
+    function_dict = {
+        'translation': translation_dict,
+        'weather': weather_dict
+    }
+    return function_dict

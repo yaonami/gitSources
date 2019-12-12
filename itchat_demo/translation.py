@@ -232,6 +232,31 @@ LANGUAGES_ZH_CN = {
 LANGUAGES_ZH_CN_S = dict(map(reversed, LANGUAGES_ZH_CN.items()))
 
 
+translationUrls = {
+    '中文转英语':'https://translate.google.cn/translate_a/single?client=webapp&sl=zh-CN&tl=en&hl=zh-CN&dt=at&dt=bd&dt=ex&' \
+                  'dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=2&ssel=0&tsel=0&kc=1&',
+    '英语转中文':'https://translate.google.cn/translate_a/single?client=webapp&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&' \
+                  'dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ssel=3&tsel=6&kc=0&',
+    '中文转日语':'https://translate.google.cn/translate_a/single?client=webapp&sl=zh-CN&tl=ja&hl=zh-CN&dt=at&dt=bd&dt=ex&' \
+                  'dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ssel=3&tsel=3&kc=0&',
+    '日语转中文':'https://translate.google.cn/translate_a/single?client=webapp&sl=ja&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&' \
+                  'dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ssel=4&tsel=3&kc=0&'
+}
+
+
+pronunciationUrls = {
+    '中文':'https://translate.google.cn/translate_tts?ie=UTF-8&tl=zh-CN&client=webapp&',
+    '英语':'https://translate.google.cn/translate_tts?ie=UTF-8&tl=en&client=webapp&',
+    '日语':'https://translate.google.cn/translate_tts?ie=UTF-8&tl=ja&client=webapp&'
+}
+
+
+URL_LIST_DICT = {
+    'translationUrl':translationUrls,
+    'pronunciationUrl':pronunciationUrls
+}
+
+
 # 检测单一语言
 def detect_language(text):
     r = translator.detect(text)
@@ -415,7 +440,100 @@ def translationText(text,srcL):
     return results
 
 
-# if __name__ == '__main__':
+# 根据url获取翻译后的内容
+def getContent(url):
+    content = ''
+    if url=='':
+        return content
+    else:
+        try:
+            r = requests.get(url)
+            res = json.loads(r.content.decode('utf-8'))
+            content = res[0][0][0]
+        except Exception as e:
+            print(e)
+        finally:
+            return content
+
+
+# 根据url获取发音
+def getPronunciation(url):
+    voicePath = ''
+    if url=='':
+        return voicePath
+    else:
+        try:
+            r = requests.get(url)
+            res = r.content
+            if not res=='':
+                voicePath = 'voice/' + str(int(time.time())) + '.mp3'
+                with open(voicePath, 'wb') as f:
+                    f.write(res)
+        except Exception as e:
+            print(e)
+        finally:
+            return voicePath
+
+
+# 中英互译
+def translationZE(text):
+    js = Py4Js()
+    tk1 = js.getTk(text)
+    q1 = urllib.parse.quote(text)
+    content = ''
+    voicePath = ''
+    res = detect_language(text)
+    if res=='中文简体' or res=='中文繁体':
+        baseUrl = URL_LIST_DICT['translationUrl']['中文转英语']
+        url = baseUrl + 'q=' + q1 + '&tk=' + str(tk1)
+        content = getContent(url)
+        tk2 = js.getTk(content)
+        q2 = urllib.parse.quote(content)
+        baseMp3Url = URL_LIST_DICT['pronunciationUrl']['英语']
+        mp3Url = baseMp3Url + 'q=' + q2 + '&tk=' +str(tk2)
+        voicePath = getPronunciation(mp3Url)
+    elif res=='英语':
+        baseUrl = URL_LIST_DICT['translationUrl']['英语转中文']
+        url = baseUrl + 'q=' + q1 + '&tk=' + str(tk1)
+        content = getContent(url)
+        tk2 = js.getTk(content)
+        q2 = urllib.parse.quote(content)
+        baseMp3Url = URL_LIST_DICT['pronunciationUrl']['中文']
+        mp3Url = baseMp3Url + 'q=' + q2 + '&tk=' + str(tk2)
+        voicePath = getPronunciation(mp3Url)
+    return content,voicePath
+
+
+# 中日互译
+def translationZJ(text):
+    js = Py4Js()
+    tk1 = js.getTk(text)
+    q1 = urllib.parse.quote(text)
+    content = ''
+    voicePath = ''
+    res = detect_language(text)
+    if res=='中文简体' or res=='中文繁体':
+        baseUrl = URL_LIST_DICT['translationUrl']['中文转日语']
+        url = baseUrl + 'q=' + q1 + '&tk=' + str(tk1)
+        content = getContent(url)
+        tk2 = js.getTk(content)
+        q2 = urllib.parse.quote(content)
+        baseMp3Url = URL_LIST_DICT['pronunciationUrl']['日语']
+        mp3Url = baseMp3Url + 'q=' + q2 + '&tk=' +str(tk2)
+        voicePath = getPronunciation(mp3Url)
+    elif res=='日语':
+        baseUrl = URL_LIST_DICT['translationUrl']['日语转中文']
+        url = baseUrl + 'q=' + q1 + '&tk=' + str(tk1)
+        content = getContent(url)
+        tk2 = js.getTk(content)
+        q2 = urllib.parse.quote(content)
+        baseMp3Url = URL_LIST_DICT['pronunciationUrl']['中文']
+        mp3Url = baseMp3Url + 'q=' + q2 + '&tk=' + str(tk2)
+        voicePath = getPronunciation(mp3Url)
+    return content,voicePath
+
+
+if __name__ == '__main__':
 #     # tx = '做个小测试，接下来的几天可能会不定时收到来自本账号的消息，如果觉得被打扰，请微信回复本账号。'
 #     # tx = '你好吗'
 # #     # tx = 'Happiness is a way station between too much and too little.'
@@ -426,9 +544,13 @@ def translationText(text,srcL):
 #     # c = ['我是谁','嗨','hi','hello','νλκμκλ','нмшмн','ぬねのねぬ']
 #     # result = detect_languages(c)
 #     # print(result)
-#     # re = detect_language('你好')
-#     # print(re)
-#     t = 'think you know everything so do not say the pain.'
+    text = 'Companionship is the most confession Keeping together is the warmest promise Waiting is the greenest romance' \
+           ' Smile is the best memory Tolerance is the most true love'
+    tx = '陪伴是最长情的告白 相守是最温暖的承诺 等待是最青涩的恋情 微笑是最美好的回忆 宽容是最真是的爱情'
+    t = '輸入你要查詢的簡體字，點擊轉換按鈕，就能轉換為繁體字。'
+    re = detect_language(t)
+    print(re)
+    # t = 'think you know everything so do not say the pain.'
 #     d = '中文简体'
 #     # d = LANGUAGES_ZH_CN_S[x]
 #     # print(d)

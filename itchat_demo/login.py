@@ -19,179 +19,197 @@ def print_time():
     print(time.time())
 
 
+# @itchat.msg_register(TEXT)
+# def auto_reply(msg):
+#     print(msg)
+
+
 @itchat.msg_register(TEXT)
-def sendTranslation(msg):
-    global user_status
+def auto_reply(msg):
+    global user_status,function_status
     print(msg)
-    if user_status[msg['FromUserName']]:
-        if msg['Text'] == '小小翻译官再见':
-            itchat.send('再见~', msg['FromUserName'])
-            user_status[msg['FromUserName']] = False
+    msg_text = msg['Text']
+    username = msg['FromUserName']
+    if user_status[username]:
+        if msg_text=='小叮咚再见':
+            itchat.send('再见，期待下次与你相遇！', username)
+            sendMS.sendStartRobotUseGuideToOne(username)
+            user_status[username] = False
+            function_status[username] = friend.setFunctionStatusFalse()
         else:
-            language = translation.detect_language(msg['Text'])
-            itchat.send('您当前输入的语言为：'+language, msg['FromUserName'])
-            results = translation.translationText(msg['Text'],language)
-            if len(results)==0:
-                itchat.send('很抱歉无法为您匹配对应的翻译，我会持续改进的，感谢您的使用', msg['FromUserName'])
+            user_status[username] = True
+            if function_status[username]['translation']['status']:
+                if function_status[username]['translation']['中英互译']:
+                    # 执行中英互译方法
+                    content,voicePath = translation.translationZE(msg_text)
+                    if content=='':
+                        itchat.send('非常抱歉，未能对您回复的内容进行翻译', username)
+                    else:
+                        itchat.send(content, username)
+                    if not voicePath=='':
+                        itchat.send_file(voicePath, username)
+                    function_status[username]['translation']['中英互译'] = False
+                    itchat.send('本次翻译任务已经完成\n如果想要退出翻译，请回复括号中内容(小小翻译官再见)\n如果想要再次翻译，请回复需要翻译的语言(中英互译或中日互译)', username)
+                elif function_status[username]['translation']['中日互译']:
+                    # 执行中日互译方法
+                    content, voicePath = translation.translationZJ(msg_text)
+                    if content == '':
+                        itchat.send('非常抱歉，未能对您回复的内容进行翻译', username)
+                    else:
+                        itchat.send(content, username)
+                    if not voicePath == '':
+                        itchat.send_file(voicePath, username)
+                    function_status[username]['translation']['中日互译'] = False
+                    itchat.send('本次翻译任务已经完成\n如果想要退出翻译，请回复括号中内容(小小翻译官再见)\n如果想要再次翻译，请回去需要翻译的语言(中英互译或中日互译)', username)
+                else:
+                    if msg_text=='小小翻译官再见':
+                        function_status[username]['translation']['status'] = False
+                        itchat.send('感谢使用小小翻译官，再见~', username)
+                        itchat.send('启动小小翻译官请回复(翻译)', username)
+                    elif msg_text=='中英互译':
+                        function_status[username]['translation']['中英互译'] = True
+                        function_status[username]['translation']['中日互译'] = False
+                        itchat.send('请回复您要翻译的内容', username)
+                    elif msg_text=='中日互译':
+                        function_status[username]['translation']['中日互译'] = True
+                        function_status[username]['translation']['中英互译'] = False
+                        itchat.send('请回复您要翻译的内容', username)
+                    else:
+                        itchat.send('小小翻译官无法识别需要翻译的内容，请阅读下面的小小翻译官使用说明', username)
+                        sendMS.sendTranslationUseGuide(username)
+            elif function_status[username]['weather']['status']:
+                if function_status[username]['weather']['实时天气']:
+                    if msg_text=='关闭实时天气':
+                        function_status[username]['weather']['实时天气'] = False
+                        itchat.send('已为您关闭实时天气查询\n重新开启实时天气请回复(实时天气', username)
+                        sendMS.sendWeatherUseGuide(username)
+                    else:
+                        res = weather.getWeatherNowByLocation(msg_text)
+                        if len(res)==0:
+                            itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                        else:
+                            for r in res:
+                                if len(r)==0:
+                                    itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                                else:
+                                    weather_content = r[0]
+                                    send_content = '地区:'+weather_content['地区']+'\n获取时间:'\
+                                                   +weather_content['更新时间']+'\n当前温度:'\
+                                                   +weather_content['当前温度']+'\n体感温度:'\
+                                                   +weather_content['体感温度']+'\n天气情况:'\
+                                                   +weather_content['当前天气']+'\n当前风向:'\
+                                                   +weather_content['当前风向']+'\n当前风力:'\
+                                                   +weather_content['当前风力']+'\n能见度:'+weather_content['能见度']
+                                    itchat.send(send_content, username)
+                        itchat.send('结束查询请回复(关闭实时天气)\n继续查询请回复查询地区', username)
+                elif function_status[username]['weather']['小时天气']:
+                    if msg_text == '关闭24小时天气':
+                        function_status[username]['weather']['小时天气'] = False
+                        itchat.send('已为您关闭24小时天气查询\n重新开启实时天气请回复(24小时天气', username)
+                        sendMS.sendWeatherUseGuide(username)
+                    else:
+                        res = weather.getWeatherDayByLocation(msg_text)
+                        if len(res)==0:
+                            itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                        else:
+                            for r in res:
+                                if len(r)==0:
+                                    itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                                else:
+                                    for result in r:
+                                        hour_weather = '地区:'+result['地区']+'\n时间:'+result['时间']+'\n天气:'\
+                                                       +result['天气']+'温度:'+result['温度']+'\n风力:'\
+                                                       +result['风力']+'\n风向:'+result['风向']
+                                        itchat.send(hour_weather, username)
+                        itchat.send('结束查询请回复(关闭24小时天气)\n继续查询请回复查询地区', username)
+                elif function_status[username]['weather']['多天天气']:
+                    if msg_text == '关闭7天天气':
+                        function_status[username]['weather']['多天天气'] = False
+                        itchat.send('已为您关闭7天天气查询\n重新开启实时天气请回复(7天天气', username)
+                        sendMS.sendWeatherUseGuide(username)
+                    else:
+                        res = weather.getWeatherRecentByLocation(msg_text)
+                        if len(res)==0:
+                            itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                        else:
+                            for r in res:
+                                if len(r)==0:
+                                    itchat.send('未获取到您所查询的地区天气情况，请确定您输入的地区是否正确', username)
+                                else:
+                                    for result in r:
+                                        day_weather = '地区:'+result['地区']+'\n日期:'+result['日期']+'\n最高温度:'\
+                                                      +result['最高温度']+'\n最低温度:'\
+                                                      +result['最低温度']+'\n白天天气:'\
+                                                      +result['白天天气']+'\n夜间天气:'\
+                                                      +result['夜间天气']+'\n风向:'\
+                                                      +result['风向']+'\n风力:'\
+                                                      +result['风力']+'\n能见度:'+result['能见度']
+                                        itchat.send(day_weather, username)
+                        itchat.send('结束查询请回复(关闭7天天气)\n继续查询请回复查询地区', username)
+                else:
+                    if msg_text=='实时天气':
+                        function_status[username]['weather']['实时天气'] = True
+                        function_status[username]['weather']['小时天气'] = False
+                        function_status[username]['weather']['多天天气'] = False
+                        itchat.send('请回复您想要查询的地区名称', username)
+                    elif msg_text=='24小时天气':
+                        function_status[username]['weather']['实时天气'] = False
+                        function_status[username]['weather']['小时天气'] = True
+                        function_status[username]['weather']['多天天气'] = False
+                        itchat.send('请回复您想要查询的地区名称', username)
+                    elif msg_text=='7天天气':
+                        function_status[username]['weather']['实时天气'] = False
+                        function_status[username]['weather']['小时天气'] = False
+                        function_status[username]['weather']['多天天气'] = True
+                        itchat.send('请回复您想要查询的地区名称', username)
+                    elif msg_text=='天气小助手再见':
+                        function_status[username]['weather']['status'] = False
+                        itchat.send('感谢使用天气小助手，再见~', username)
+                        itchat.send('启动天气小助手请回复(天气)', username)
+                    else:
+                        itchat.send('天气小助手无法识别您想要查询的内容，请阅读下面的天气小助手使用说明', username)
+                        sendMS.sendWeatherUseGuide(username)
             else:
-                for result in results:
-                    itchat.send(result['language']+'翻译为：\n'+result['content']+'\n下面是'+result['language']+'读音', msg['FromUserName'])
-                    itchat.send_file(result['voice'], msg['FromUserName'])
+                if msg_text=='翻译':
+                    function_status[username]['translation']['status'] = True
+                    function_status[username]['weather']['status'] = False
+                    sendMS.sendTranslationUseGuide(username)
+                elif msg_text=='天气':
+                    function_status[username]['weather']['status'] = True
+                    function_status[username]['translation']['status'] = False
+                    sendMS.sendWeatherUseGuide(username)
+                else:
+                    # 启用聊天机器人
+                    robotResult = robot.QINGYUNKERobot(msg_text)
+                    itchat.send(robotResult, username)
     else:
-        if msg['Text'] == '小小翻译官':
-            itchat.send('在的呢，您可以输入您想翻译的内容哦~', msg['FromUserName'])
-            user_status[msg['FromUserName']] = True
+        if msg_text=='小叮咚':
+            itchat.send('在的呢~~\n接下来让小叮咚陪你愉快玩耍吧!!!', username)
+            sendMS.sendRobotUseGuideToOne(username)
+            user_status[username] = True
+        else:
+            user_status[username] = False
 
-
-
-# @itchat.msg_register(TEXT)
-# def sendDetectLanguage(msg):
-#     global user_status
-#     print(msg)
-#     if user_status[msg['FromUserName']]:
-#         if msg['Text'] == '结束检测':
-#             itchat.send('语言检测助手下线啦', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = False
-#         else:
-#             info = translation.detect_language(msg['Text'])
-#             itchat.send(info, msg['FromUserName'])
-#     else:
-#         if msg['Text'] == '语言检测助手':
-#             itchat.send('语言检测助手到', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = True
-
-
-# @itchat.msg_register(TEXT)
-# def sendMsgByQYKRobot(msg):
-#     print(msg)
-#     global user_status
-#     if user_status[msg['FromUserName']]:
-#         if msg['Text']=='小叮咚再见':
-#             itchat.send('再见!', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = False
-#         else:
-#             info = robot.QINGYUNKERobot(msg['Text'])
-#             time.sleep(2)
-#             itchat.send(info, msg['FromUserName'])
-#     else:
-#         if msg['Text'] == '小叮咚':
-#             itchat.send('在的呢!', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = True
-
-
-# @itchat.msg_register(TEXT)
-# def sendWeather(msg):
-#     print(msg)
-#     type_info = msg['Text'].split('-')[0]
-#     area = msg['Text'].split('-')[1]
-#     res = ''
-#     if type_info=='实况天气':
-#         weather_info = weather.getWeatherNow(area)
-#         print(weather_info)
-#         info = '当前所在地区：'+weather_info['地区']+'\n'+'天气更新时间：'+weather_info['更新时间']+'\n'+'当前天气：'\
-#                +weather_info['当前天气']+'\n'+'当前风向：'+weather_info['当前风向']+'\n'+'当前风力：'\
-#                +weather_info['当前风力']+'级'+'\n'+'能见度：'+weather_info['能见度']+' KM'+'\n'+'当前温度：'\
-#                +weather_info['当前温度']+'℃'+'\n'+'体感温度：'+weather_info['体感温度']+'℃'
-#         res = info
-#     elif type_info=='未来7天天气预报':
-#         weather_info = weather.getWeatherForecast(area)
-#         print(weather_info)
-#         infos = ''
-#         for w in weather_info:
-#             info = '日期：'+w['日期']+'\n'+'白天天气：'+w['白天天气']+'\n'+'夜间天气：'+w['夜间天气']+'\n'+'风向：'\
-#                    +w['风向']+'\n'+'风力：'+w['风力']+'级'+'\n'+'最低温度：'+w['最低温度']+'℃'+'\n'+'最高温度：'\
-#                    +w['最高温度']+'℃'+'\n'+'能见度：'+w['能见度']+' KM'+'\n'+'--------'+'\n'
-#             infos = infos + info
-#         res = infos
-#     elif type_info=='未来24小时天气预报':
-#         weather_info = weather.getWeatherHourly(area)
-#         print(weather_info)
-#         infos = ''
-#         for w in weather_info:
-#             info = '时间：'+w['时间']+'\n'+'天气：'+w['天气']+'\n'+'风向：'+w['风向']+'\n'+'风力：'\
-#                    +w['风力']+'级'+'\n'+'温度：'+w['温度']+'℃'+'\n'+'--------'+'\n'
-#             infos = infos + info
-#         res = infos
-#     elif type_info == '生活小贴士':
-#         weather_info = weather.getWeatherLifestyle(area)
-#         infos = ''
-#         for w in weather_info:
-#             f,b = str(w)[1:len(str(w))-1].split(':')
-#             info = f[1:len(f)-1] + '：'+b[2:len(b)-1]+'\n'+'========'+'\n'
-#             infos = infos + info
-#         res = infos
-#     return res
-#
-#
-# @itchat.msg_register(TEXT)
-# def sendMsgByTLRobot(msg):
-#     global user_status
-#     if user_status[msg['FromUserName']]:
-#         if msg['Text']=='小叮咚再见':
-#             itchat.send('再见!', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = False
-#         else:
-#             info = robot.get_response(msg['Text'])
-#             itchat.send(info, msg['FromUserName'])
-#     else:
-#         if msg['Text']=='小叮咚':
-#             itchat.send('在的呢!', msg['FromUserName'])
-#             user_status[msg['FromUserName']] = True
 
 
 if __name__ == "__main__":
-    global user_status
+    global user_status,function_status
     login()
+    # itchat.auto_login(hotReload=True)
     user_status = friend.createUserStatusDict()
-    # print(user_status)
-    # user_status = friend.createUserStatusRWDict()
-    # print(user_status)
-    sentence_remarkNames = ['A大树','D肖健伟','XC罗','X度小囡','X李涛','X十一','X云熙','XL先生']
+    function_status = friend.createFunctionStatusDict()
+    # itchat.run()
+    sentence_remarkNames = ['A大树', 'D肖健伟', 'XC罗', 'X度小囡', 'X李涛', 'X十一', 'X云熙', 'XL先生']
     # sentence_remarkNames = ['A大树']
-    # sendMS.sendTranslationTips(sentence_remarkNames)
-    # sendMS.sendDetectLanguageTips(sentence_remarkNames)
-    sendMS.sendMsgTips(sentence_remarkNames)
-    # sendMS.sendEvening(sentence_remarkNames)
-    # sendMS.sendMorning(sentence_remarkNames)
-    # sendMS.sendTips(sentence_remarkNames)
-    # sendMS.sendWeatherTips(sentence_remarkNames)
-    # sendMS.sendSentence(sentence_remarkNames)
-    # itchat.send_file('1.mp3', 'filehelper')
-    # sendMS.sendPicture('pic7.gif')
-    # sendMS.sendPictureByNickName('一人一歌一世界','pic7.gif')
-    # friend.get_friend('文件传输助手')
-    # print(user_status)
-    # print(tmp)
-    # scheduler = BlockingScheduler()
     scheduler = BackgroundScheduler()
-    # # scheduler.add_job(print_time, 'date', run_date='2019-12-7 14:35:00')
-    # scheduler.add_job(sendMsgByQYKRobot, trigger='cron', hour='20', minute='18')
-    # scheduler.add_job(sendWeather, trigger='cron', hour='20', minute='20')
-    scheduler.add_job(login, 'cron', hour='21', minute='00')
-    scheduler.add_job(sendMS.sendTranslationTips, args=[sentence_remarkNames,], trigger='cron', hour='21', minute='01')
-    # scheduler.add_job(sendMS.sendTranslationTips, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='33')
-    # scheduler.add_job(sendMS.sendTips, args=[sentence_remarkNames,], trigger='cron', hour='22', minute='01')
-    # scheduler.add_job(sendMS.sendTips, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='36')
-    scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames,], trigger='cron', hour='22', minute='30')
-    # scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='37')
-    # # scheduler.add_job(print_time, 'interval', seconds=10)
-    # scheduler.add_job(sendMS.sendMsg, trigger='cron', hour='15', minute='03')
-    # scheduler.add_job(sendMS.sendMsg, args=['起床啦，新的一天从微笑开始！',], trigger='cron', hour='15', minute='11')
     scheduler.add_job(sendMS.sendMorning, args=[sentence_remarkNames, ], trigger='cron', hour='7', minute='0')
-    # scheduler.add_job(sendMS.sendMorning, args=[sentence_remarkNames, ], trigger='cron', hour='20', minute='38')
-    scheduler.add_job(sendMS.sendSentence, args=[sentence_remarkNames,], trigger='cron', hour='7', minute='30')
-    # scheduler.add_job(sendMS.sendSentence, args=[sentence_remarkNames,], trigger='cron', hour='20', minute='39')
-    # scheduler.add_job(sendMS.sendWeatherTips, args=[sentence_remarkNames,], trigger='cron', hour='8', minute='0')
+    scheduler.add_job(sendMS.sendSentence, args=[sentence_remarkNames, ], trigger='cron', hour='7', minute='30')
+    scheduler.add_job(login, 'cron', hour='21', minute='58')
+    scheduler.add_job(sendMS.sendMsgTips, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='00')
+    scheduler.add_job(sendMS.sendRobotUseGuide, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='01')
+    scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='30')
     scheduler.start()
-    # print_time()
-    # tmp = weather.getWeatherForecast('北京')
-    # tmp = weather.getWeatherHourly('北京')
-    # tmp = weather.getWeatherLifestyle('北京')
-    # tmp = weather.getWeatherNow('南昌')
-    # print(tmp)
-    itchat.run()
     while True:
-        pass
-    # info  = robot.get_response('123')
-    # print(info)
-
+        itchat.configured_reply()
+        time.sleep(1)
+        # pass
