@@ -23,8 +23,9 @@ def getPoissonResult(width, height, radius, margin, file):
 def getClosestEmoji(r, g, b, file):
     js = getJSContent(file)
     ctx = execjs.compile(js)
-    print(ctx)
+    # print(ctx)
     result = ctx.call('emoji', r, g, b)
+    # print(result)
     return result
 
 
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     # print(contents)
     path = 'wyf.jpg'
     img = cv2.imread(path)
-    print(img.shape)
+    # print(img.shape)
     width = str(img.shape[1]+400)
     height = str(img.shape[0]+400)
     radius = '8'
