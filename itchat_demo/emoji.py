@@ -24,7 +24,7 @@ def getClosestEmoji(r, g, b, file):
     js = getJSContent(file)
     ctx = execjs.compile(js)
     print(ctx)
-    result = ctx.call('result', r, g, b)
+    result = ctx.call('emoji', r, g, b)
     return result
 
 
