@@ -53,8 +53,7 @@ def sendTips(remarkNames):
 
 # 发送早上好
 def sendMorning(remarkNames):
-    msg = ' 任何收获都不是巧合，而是用日复一日的付出换来。不怕你每天迈的步子太小，只怕你停滞不前；不怕你每天做的事太少，' \
-          '只怕你无所事事。今日一点一滴的进步，终会塑造一个与众不同的你。新的一天，早安！'
+    msg = ' 每个睡醒后的早晨都是一件礼物，要把每个开心后的微笑当成一个习惯，早安~~，愿你有美好的一天。'
     today = time.strftime("%Y%m%d")
     picture = './picture/' + today + '-morning.gif'
     # print(picture)
