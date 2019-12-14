@@ -3,12 +3,14 @@ from itchat.content import *
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 import time
+import os
 
 import sendMS
 import weather
 import robot
 import friend
 import translation
+import emojiUrl
 
 
 def login():
@@ -24,8 +26,20 @@ def print_time():
 #     print(msg)
 
 
+@itchat.msg_register(PICTURE)
+def auto_reply_picture(msg):
+    print(msg)
+    path1 = r'D:\gitSources\itchat_demo\emoji_picture'
+    picture_path = os.path.join(path1,msg.fileName)
+    msg.download(picture_path)
+    emojiUrl.getEmoji(msg['FromUserName'],picture_path)
+    path1 = r'D:\gitSources\itchat_demo\emoji_image'
+    emoji_path = os.path.join(path1, msg['FromUserName'],'emoji-mosaic.jpg')
+    itchat.send_image(emoji_path, msg['FromUserName'])
+
+
 @itchat.msg_register(TEXT)
-def auto_reply(msg):
+def auto_reply_text(msg):
     global user_status,function_status
     print(msg)
     msg_text = msg['Text']
@@ -201,12 +215,13 @@ if __name__ == "__main__":
     # itchat.run()
     sentence_remarkNames = ['A大树', 'D肖健伟', 'XC罗', 'X度小囡', 'X李涛', 'X十一', 'X云熙', 'XL先生']
     # sentence_remarkNames = ['A大树']
+    # sendMS.sendPictureTips(sentence_remarkNames)
     scheduler = BackgroundScheduler()
     scheduler.add_job(sendMS.sendMorning, args=[sentence_remarkNames, ], trigger='cron', hour='7', minute='0')
     scheduler.add_job(sendMS.sendSentence, args=[sentence_remarkNames, ], trigger='cron', hour='7', minute='30')
-    scheduler.add_job(login, 'cron', hour='21', minute='58')
-    scheduler.add_job(sendMS.sendMsgTips, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='00')
-    scheduler.add_job(sendMS.sendRobotUseGuide, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='01')
+    scheduler.add_job(login, 'cron', hour='20', minute='58')
+    scheduler.add_job(sendMS.sendPictureTips, args=[sentence_remarkNames, ], trigger='cron', hour='21', minute='00')
+    # scheduler.add_job(sendMS.sendRobotUseGuide, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='01')
     scheduler.add_job(sendMS.sendEvening, args=[sentence_remarkNames, ], trigger='cron', hour='22', minute='30')
     scheduler.start()
     while True:

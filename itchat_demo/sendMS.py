@@ -90,7 +90,7 @@ def sendEvening(remarkNames):
                 '大千世界，我们并不是缺少一个说话的朋友，而是渴望一个理解自己读懂自己的伙伴。晚安。',
                 '总有人会穿越人海找到你，拥抱你，无论海水涨潮还是退潮，无论日出还是日落，他都会坚定地奔向你，不退缩，'
                 '不犹豫。晚安。']
-    msg = '大千世界，我们并不是缺少一个说话的朋友，而是渴望一个理解自己读懂自己的伙伴。晚安~~'
+    msg = '总有人会穿越人海找到你，拥抱你，无论海水涨潮还是退潮，无论日出还是日落，他都会坚定地奔向你，不退缩，不犹豫。晚安。'
     today = time.strftime("%Y%m%d")
     picture = 'picture/' + str(today) + '-evening.gif'
     for remarkName in remarkNames:
@@ -163,3 +163,10 @@ def sendWeatherUseGuide(username):
           '\n查询未来7天天气请回复(7天天气)\n退出未来7天天气查询请回复(关闭7天天气)\n' \
           '查询未来24小时天气请回复(24小时天气)\n退出未来24小时天气查询请回复(关闭24小时天气)'
     itchat.send(msg, username)
+
+
+def sendPictureTips(remarkNames):
+    msg = '发送给我一张图片，还你一张更好玩的图片，不试会后悔哦~~~'
+    for remarkName in remarkNames:
+        info = itchat.search_friends(remarkName)[0]
+        itchat.send_msg(msg, info['UserName'])
