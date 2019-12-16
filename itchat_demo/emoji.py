@@ -50,7 +50,7 @@ if __name__ == '__main__':
     # emojiColors = getEmojiColors('emojiColors.js')
     # print(type(emojiColors))
     # print(contents)
-    path = 'wyf.jpg'
+    path = 'emoji_picture/wyf.jpg'
     img = cv2.imread(path)
     # print(img.shape)
     width = str(img.shape[1])

@@ -30,12 +30,13 @@ def print_time():
 def auto_reply_picture(msg):
     print(msg)
     path1 = r'D:\gitSources\itchat_demo\emoji_picture'
-    picture_path = os.path.join(path1,msg.fileName)
-    msg.download(picture_path)
-    emojiUrl.getEmoji(msg['FromUserName'],picture_path)
-    path1 = r'D:\gitSources\itchat_demo\emoji_image'
-    emoji_path = os.path.join(path1, msg['FromUserName'],'emoji-mosaic.jpg')
-    itchat.send_image(emoji_path, msg['FromUserName'])
+    if msg.fileName.split('.')[-1]=='jpg' or msg.fileName.split('.')[-1]=='png':
+        picture_path = os.path.join(path1,msg.fileName)
+        msg.download(picture_path)
+        emojiUrl.getEmoji(msg['FromUserName'],picture_path)
+        path1 = r'D:\gitSources\itchat_demo\emoji_image'
+        emoji_path = os.path.join(path1, msg['FromUserName'],'emoji-mosaic.jpg')
+        itchat.send_image(emoji_path, msg['FromUserName'])
 
 
 @itchat.msg_register(TEXT)
@@ -213,8 +214,7 @@ if __name__ == "__main__":
     user_status = friend.createUserStatusDict()
     function_status = friend.createFunctionStatusDict()
     # itchat.run()
-    sentence_remarkNames = ['A大树', 'D肖健伟', 'XC罗', 'X度小囡', 'X李涛', 'X十一', 'X云熙', 'XL先生']
-    # sentence_remarkNames = ['A大树']
+    sentence_remarkNames = ['A大树']
     # sendMS.sendPictureTips(sentence_remarkNames)
     scheduler = BackgroundScheduler()
     scheduler.add_job(sendMS.sendMorning, args=[sentence_remarkNames, ], trigger='cron', hour='7', minute='0')
